@@ -1,5 +1,17 @@
 import math
 import heapq
+import random
+
+# TODO This class should be in a separate file named "Building.py"
+class Building:
+    def __init__(self, name:str, latitude: float, longitude: float):
+        self.name = name
+        self.coords: tuple[float, float] = (latitude, longitude)
+        self.neighbors: list["Building"] = []
+
+    def __repr__(self):
+        return f"{self.name}"
+    
 
 def main():
     all_locations = create_buildings()
@@ -14,7 +26,7 @@ def main():
 
     # print(find_buildings_within_two_edges(all_locations[0]))
 
-    ady = build_adjacency_list(all_locations)
+    ady: dict[Building, set[tuple[Building, float]]] = build_adjacency_list(all_locations)
     # print(ady)
 
     print(all_locations[0], all_locations[8])
@@ -24,15 +36,10 @@ def main():
 
 
 
-class Building:
-    def __init__(self, name, latitude, longitude):
-        self.name = name
-        self.coords = (latitude, longitude)
-        self.neighbors = []
+# TODO You need a Buildings.py file that has a list[Building] instance variable.
 
-    def __repr__(self):
-        return f"{self.name}"
-
+# TODO This should be a @staticmethod within the Buildings class.
+# locations = Buildings.create_buildings()  # class calls because no object needed
 def create_buildings() -> list[Building]:
     locations = [
         Building("Admin", 29.964440282121426, -90.10699538972723),
@@ -52,16 +59,9 @@ def create_buildings() -> list[Building]:
     ]
     return locations
 
+# TODO This should be a method (with self as first parameter) within the Buildings class.
 def connect_all_buildings(all_locations: list[Building]):
     num_locations = len(all_locations)
-
-    # Connect each building to every other building
-    # for i in range(len(all_locations)):
-    #     for j in range(i + 1, len(all_locations)):
-    #         connect_building(all_locations[i], all_locations[j])
-    #         connect_building(all_locations[j], all_locations[i])
-
-
 
     # Connect each building to the next two buildings in the list (circularly)
     for i in range(num_locations):
@@ -73,27 +73,47 @@ def connect_all_buildings(all_locations: list[Building]):
         connect_building(current_building, all_locations[neighbor_index_1])
         connect_building(current_building, all_locations[neighbor_index_2])
 
+# TODO This should be a @staticmethod (no self) within the Buildings class.
+def connect_random_buildings(all_locations: list[Building], num_edges: int):
+    for _ in range(num_edges):
+        connect_building(random.choice(all_locations), random.choice(all_locations))
+        connect_building(random.choice(all_locations), random.choice(all_locations))
+
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def connect_complete_graph(all_locations: list[Building]):
+    num_locations = len(all_locations)
+
+    # Connect each building to every other building == a COMPLETE graph
+    for i in range(num_locations):
+        for j in range(i + 1, len(all_locations)):
+            connect_building(all_locations[i], all_locations[j])
+            connect_building(all_locations[j], all_locations[i])
+
+# TODO This should be a method (with self as first parameter) within the Buildings class.
 def connect_building(building_node: Building, target_node: Building):
     building_node.neighbors.append(target_node)
 
-def build_adjacency_list(locations: list[Building]) -> dict[Building: set[(Building, float)]]:
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def build_adjacency_list(locations: list[Building]) -> dict[Building, set[tuple[Building, float]]]:
     ady = {building : {(neigbhor, haversine_distance_function(building, neigbhor) ) for neigbhor in building.neighbors} for building in locations}
     return ady
 
+# TODO This should be a __private method (with self as first parameter) within the Buildings class.
 def find_euclidean_distance(building_a: Building, building_b: Building) -> float:
-    long_a, lat_a = building_a.coords
-    long_b, lat_b = building_b.coords
+    lat_a, long_a = building_a.coords
+    lat_b, long_b = building_b.coords
 
-    long_diff_sq = (long_b - long_a)**2
-    lat_diff_sq = (lat_b - lat_a)**2
+    long_diff_sq: float = (long_b - long_a) ** 2
+    lat_diff_sq: float = (lat_b - lat_a) ** 2
 
     return math.sqrt(long_diff_sq + lat_diff_sq)
 
+# TODO This should be a __private method (with self as first parameter) within the Buildings class.
 def haversine_distance_function(building_a: Building, building_b: Building) -> float:
     R = 6371.0 
 
-    long1, lat1 = map(math.radians, building_a.coords)
-    long2, lat2 = map(math.radians, building_b.coords)
+    lat1, long1 = map(math.radians, building_a.coords)
+    lat2, long2 = map(math.radians, building_b.coords)
 
     dlon = long2 - long1
     dlat = lat2 - lat1
@@ -104,11 +124,13 @@ def haversine_distance_function(building_a: Building, building_b: Building) -> f
     distance = R * c
     return distance
 
-def find_adjacent_buildings(building: Building) -> list:
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def find_adjacent_buildings(building: Building) -> list[Building]:
     return building.neighbors
 
-def find_buildings_within_two_edges(building: Building) -> set:
-    buildings = set()
+# TODO Buildings.find_buildings_within(num_edges, building: Building)
+def find_buildings_within_two_edges(building: Building) -> set[Building]:
+    buildings: set[Building] = set()
     for neigbhour in building.neighbors:
         buildings.add(neigbhour)
 
@@ -118,16 +140,17 @@ def find_buildings_within_two_edges(building: Building) -> set:
     return buildings
 
 
-def dijkstra(ady, building1: Building, building2: Building) -> list[float, str]:
-    INF = 10**8
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def dijkstra(ady: dict[Building, set[tuple[Building, float]]], building1: Building, building2: Building) -> tuple[float, str]:
+    INF = float('inf')
 
-    previous = {building: None for building in ady}
-    distance_frm_src = {building: INF for building in ady}
-    visited = {building: False for building in ady}
-    pq = []
+    previous: dict[Building, Building | None] = {building: None for building in ady}
+    distance_frm_src: dict[Building, float] = {building: INF for building in ady}
+    visited: dict[Building, bool] = {building: False for building in ady}
+    pq: list[tuple[float, Building]] = []
 
-    heapq.heappush(pq, (0, building1))
-    distance_frm_src[building1] = 0
+    heapq.heappush(pq, (0.0, building1))
+    distance_frm_src[building1] = 0.0
 
     while pq:
         curr_shortest_ditance_from_src, curr_building = heapq.heappop(pq)
@@ -146,20 +169,33 @@ def dijkstra(ady, building1: Building, building2: Building) -> list[float, str]:
     
 
     while curr != building1:
+        if curr is None or previous[curr] is None:
+            break
         path.append(repr(previous[curr]))
         curr = previous[curr]
 
     for i in range(len(path)//2):
         path[i], path[len(path)-1-i] = path[len(path)-1-i], path[i] 
 
-    return [distance_frm_src[building2], " --> ".join(path)]
+    return (distance_frm_src[building2], " --> ".join(path))
 
-def shortest_distance_btw_two_buildings(ady, building1: Building, building2: Building) -> str:
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def shortest_distance_btw_two_buildings(
+    ady: dict[Building, set[tuple[Building, float]]], 
+    building1: Building, 
+    building2: Building
+) -> str:
     return f"{dijkstra(ady, building1, building2)[0]} km"
     
 
-def shortest_path_btw_two_buildings(ady, building1: Building, building2: Building) -> str:
+# TODO This should be a method (with self as first parameter) within the Buildings class.
+def shortest_path_btw_two_buildings(
+    ady: dict[Building, set[tuple[Building, float]]], 
+    building1: Building, 
+    building2: Building
+) -> str:
     return dijkstra(ady, building1, building2)[1]
+
 
 if __name__ == "__main__":
     main()
