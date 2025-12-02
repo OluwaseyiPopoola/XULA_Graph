@@ -1,17 +1,8 @@
 import math
 import heapq
 import random
+from Building import Building
 
-# TODO This class should be in a separate file named "Building.py"
-class Building:
-    def __init__(self, name:str, latitude: float, longitude: float):
-        self.name = name
-        self.coords: tuple[float, float] = (latitude, longitude)
-        self.neighbors: list["Building"] = []
-
-    def __repr__(self):
-        return f"{self.name}"
-    
 
 def main():
     all_locations = create_buildings()
