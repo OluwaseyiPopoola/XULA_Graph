@@ -2,11 +2,13 @@ import math
 import heapq
 import random
 from Building import Building
+from Buildings import Buildings
 
 
 def main():
-    all_locations = create_buildings()
-    connect_all_buildings(all_locations)
+    buildings_instance: Buildings = Buildings.create_buildings()
+    all_locations = buildings_instance.all_locations
+    buildings_instance.connect_all_buildings()
     
     # print("Graph Connection Verification")
     # for i, location in enumerate(all_locations):
@@ -31,58 +33,19 @@ def main():
 
 # TODO This should be a @staticmethod within the Buildings class.
 # locations = Buildings.create_buildings()  # class calls because no object needed
-def create_buildings() -> list[Building]:
-    locations = [
-        Building("Admin", 29.964440282121426, -90.10699538972723),
-        Building("Chapel",29.96593408811449, -90.1064650276058),
-        Building("Library",29.96599544988278, -90.10716232208914), 
-        Building("U_Center",29.964703488401312, -90.10535987770028),
-        Building("Pharmacy",29.96578980910307, -90.10667462208916),
-        Building("St_Joseph",29.963506522473068, -90.10636098690512),
-        Building("St_Michael",29.96477061529604, -90.10569579909495),
-        Building("Xavier_S",29.961747090734512, -90.10206360674651),
-        Building("Convo_Ctr",29.964097325222845, -90.10923296221479),
-        Building("DP",29.96168994182377, -90.10292977127155),
-        
-        Building("New_Orleans",29.9547, -90.0751),
-        Building("Abuja",9.084576, 7.483333),
-        Building("Harare",-17.824858, 31.053028)
-    ]
-    return locations
+
 
 # TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_all_buildings(all_locations: list[Building]):
-    num_locations = len(all_locations)
 
-    # Connect each building to the next two buildings in the list (circularly)
-    for i in range(num_locations):
-        current_building = all_locations[i]
-        
-        neighbor_index_1 = (i + 1) % num_locations
-        neighbor_index_2 = (i + 2) % num_locations
-        
-        connect_building(current_building, all_locations[neighbor_index_1])
-        connect_building(current_building, all_locations[neighbor_index_2])
 
 # TODO This should be a @staticmethod (no self) within the Buildings class.
-def connect_random_buildings(all_locations: list[Building], num_edges: int):
-    for _ in range(num_edges):
-        connect_building(random.choice(all_locations), random.choice(all_locations))
-        connect_building(random.choice(all_locations), random.choice(all_locations))
+
 
 # TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_complete_graph(all_locations: list[Building]):
-    num_locations = len(all_locations)
 
-    # Connect each building to every other building == a COMPLETE graph
-    for i in range(num_locations):
-        for j in range(i + 1, len(all_locations)):
-            connect_building(all_locations[i], all_locations[j])
-            connect_building(all_locations[j], all_locations[i])
 
 # TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_building(building_node: Building, target_node: Building):
-    building_node.neighbors.append(target_node)
+
 
 # TODO This should be a method (with self as first parameter) within the Buildings class.
 def build_adjacency_list(locations: list[Building]) -> dict[Building, set[tuple[Building, float]]]:
