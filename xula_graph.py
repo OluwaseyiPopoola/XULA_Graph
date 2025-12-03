@@ -1,4 +1,4 @@
-from Buildings import GraphManager
+from GraphManager import GraphManager
 
 def main():
     xula_map: GraphManager = GraphManager.create_buildings()
