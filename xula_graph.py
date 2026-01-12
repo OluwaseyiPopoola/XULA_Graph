@@ -1,201 +1,25 @@
-import math
-import heapq
-import random
-
-# TODO This class should be in a separate file named "Building.py"
-class Building:
-    def __init__(self, name:str, latitude: float, longitude: float):
-        self.name = name
-        self.coords: tuple[float, float] = (latitude, longitude)
-        self.neighbors: list["Building"] = []
-
-    def __repr__(self):
-        return f"{self.name}"
-    
+from GraphManager import GraphManager
 
 def main():
-    all_locations = create_buildings()
-    connect_all_buildings(all_locations)
+    xula_map: GraphManager = GraphManager.create_buildings()
     
+    xula_map.connect_random_buildings(20)
+    xula_map.adjacency_list = xula_map.build_adjacency_list()
+    
+
     # print("Graph Connection Verification")
-    # for i, location in enumerate(all_locations):
+    # for location in xula_map.all_locations:
     #     neighbor_names = [node.name for node in location.neighbors]
     #     print(f"{location.name}: -> {neighbor_names}")
 
-    # print(find_adjacent_buildings(all_locations[0]))
+    # Test find_adjacent_buildings and find_buildings_within_n_edges
+    # print(xula_map.all_locations[0].find_adjacent_buildings())
+    # print(xula_map.all_locations[0].find_buildings_within_n_edges(2))
 
-    # print(find_buildings_within_two_edges(all_locations[0]))
-
-    ady: dict[Building, set[tuple[Building, float]]] = build_adjacency_list(all_locations)
-    # print(ady)
-
-    print(all_locations[0], all_locations[8])
-
-    print(shortest_distance_btw_two_buildings(ady, all_locations[0], all_locations[8]))
-    print(shortest_path_btw_two_buildings(ady, all_locations[0], all_locations[8]))
-
-
-
-# TODO You need a Buildings.py file that has a list[Building] instance variable.
-
-# TODO This should be a @staticmethod within the Buildings class.
-# locations = Buildings.create_buildings()  # class calls because no object needed
-def create_buildings() -> list[Building]:
-    locations = [
-        Building("Admin", 29.964440282121426, -90.10699538972723),
-        Building("Chapel",29.96593408811449, -90.1064650276058),
-        Building("Library",29.96599544988278, -90.10716232208914), 
-        Building("U_Center",29.964703488401312, -90.10535987770028),
-        Building("Pharmacy",29.96578980910307, -90.10667462208916),
-        Building("St_Joseph",29.963506522473068, -90.10636098690512),
-        Building("St_Michael",29.96477061529604, -90.10569579909495),
-        Building("Xavier_S",29.961747090734512, -90.10206360674651),
-        Building("Convo_Ctr",29.964097325222845, -90.10923296221479),
-        Building("DP",29.96168994182377, -90.10292977127155),
-        
-        Building("New_Orleans",29.9547, -90.0751),
-        Building("Abuja",9.084576, 7.483333),
-        Building("Harare",-17.824858, 31.053028)
-    ]
-    return locations
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_all_buildings(all_locations: list[Building]):
-    num_locations = len(all_locations)
-
-    # Connect each building to the next two buildings in the list (circularly)
-    for i in range(num_locations):
-        current_building = all_locations[i]
-        
-        neighbor_index_1 = (i + 1) % num_locations
-        neighbor_index_2 = (i + 2) % num_locations
-        
-        connect_building(current_building, all_locations[neighbor_index_1])
-        connect_building(current_building, all_locations[neighbor_index_2])
-
-# TODO This should be a @staticmethod (no self) within the Buildings class.
-def connect_random_buildings(all_locations: list[Building], num_edges: int):
-    for _ in range(num_edges):
-        connect_building(random.choice(all_locations), random.choice(all_locations))
-        connect_building(random.choice(all_locations), random.choice(all_locations))
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_complete_graph(all_locations: list[Building]):
-    num_locations = len(all_locations)
-
-    # Connect each building to every other building == a COMPLETE graph
-    for i in range(num_locations):
-        for j in range(i + 1, len(all_locations)):
-            connect_building(all_locations[i], all_locations[j])
-            connect_building(all_locations[j], all_locations[i])
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def connect_building(building_node: Building, target_node: Building):
-    building_node.neighbors.append(target_node)
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def build_adjacency_list(locations: list[Building]) -> dict[Building, set[tuple[Building, float]]]:
-    ady = {building : {(neigbhor, haversine_distance_function(building, neigbhor) ) for neigbhor in building.neighbors} for building in locations}
-    return ady
-
-# TODO This should be a __private method (with self as first parameter) within the Buildings class.
-def find_euclidean_distance(building_a: Building, building_b: Building) -> float:
-    lat_a, long_a = building_a.coords
-    lat_b, long_b = building_b.coords
-
-    long_diff_sq: float = (long_b - long_a) ** 2
-    lat_diff_sq: float = (lat_b - lat_a) ** 2
-
-    return math.sqrt(long_diff_sq + lat_diff_sq)
-
-# TODO This should be a __private method (with self as first parameter) within the Buildings class.
-def haversine_distance_function(building_a: Building, building_b: Building) -> float:
-    R = 6371.0 
-
-    lat1, long1 = map(math.radians, building_a.coords)
-    lat2, long2 = map(math.radians, building_b.coords)
-
-    dlon = long2 - long1
-    dlat = lat2 - lat1
-
-    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distance = R * c
-    return distance
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def find_adjacent_buildings(building: Building) -> list[Building]:
-    return building.neighbors
-
-# TODO Buildings.find_buildings_within(num_edges, building: Building)
-def find_buildings_within_two_edges(building: Building) -> set[Building]:
-    buildings: set[Building] = set()
-    for neigbhour in building.neighbors:
-        buildings.add(neigbhour)
-
-        for neigbhour_of_neigbhour in neigbhour.neighbors:
-            buildings.add(neigbhour_of_neigbhour)
-
-    return buildings
-
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def dijkstra(ady: dict[Building, set[tuple[Building, float]]], building1: Building, building2: Building) -> tuple[float, str]:
-    INF = float('inf')
-
-    previous: dict[Building, Building | None] = {building: None for building in ady}
-    distance_frm_src: dict[Building, float] = {building: INF for building in ady}
-    visited: dict[Building, bool] = {building: False for building in ady}
-    pq: list[tuple[float, Building]] = []
-
-    heapq.heappush(pq, (0.0, building1))
-    distance_frm_src[building1] = 0.0
-
-    while pq:
-        curr_shortest_ditance_from_src, curr_building = heapq.heappop(pq)
-
-        for neigbhour, edge_distance in ady[curr_building]:
-            if visited[neigbhour]:
-                continue
-
-            if edge_distance + curr_shortest_ditance_from_src < distance_frm_src[neigbhour]:
-                distance_frm_src[neigbhour] = edge_distance + curr_shortest_ditance_from_src
-                previous[neigbhour] = curr_building
-                heapq.heappush(pq, (distance_frm_src[neigbhour], neigbhour))
-
-    curr = building2
-    path = [repr(curr)]
-    
-
-    while curr != building1:
-        if curr is None or previous[curr] is None:
-            break
-        path.append(repr(previous[curr]))
-        curr = previous[curr]
-
-    for i in range(len(path)//2):
-        path[i], path[len(path)-1-i] = path[len(path)-1-i], path[i] 
-
-    return (distance_frm_src[building2], " --> ".join(path))
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def shortest_distance_btw_two_buildings(
-    ady: dict[Building, set[tuple[Building, float]]], 
-    building1: Building, 
-    building2: Building
-) -> str:
-    return f"{dijkstra(ady, building1, building2)[0]} km"
-    
-
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-def shortest_path_btw_two_buildings(
-    ady: dict[Building, set[tuple[Building, float]]], 
-    building1: Building, 
-    building2: Building
-) -> str:
-    return dijkstra(ady, building1, building2)[1]
-
+    # Test shortest path and distance using Dijkstra's algorithm
+    # print(xula_map.all_locations[0], xula_map.all_locations[8])
+    # print(xula_map.shortest_distance_btw_two_buildings(xula_map.all_locations[0], xula_map.all_locations[8]))
+    # print(xula_map.shortest_path_btw_two_buildings(xula_map.all_locations[0], xula_map.all_locations[8]))
 
 if __name__ == "__main__":
     main()
