@@ -21,23 +21,6 @@ def main():
     # print(xula_map.shortest_distance_btw_two_buildings(xula_map.all_locations[0], xula_map.all_locations[8]))
     # print(xula_map.shortest_path_btw_two_buildings(xula_map.all_locations[0], xula_map.all_locations[8]))
 
-
-# TODO You need a Buildings.py file that has a list[Building] instance variable.
-# TODO This should be a @staticmethod within the Buildings class.
-# locations = Buildings.create_buildings()  # class calls because no object needed
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a @staticmethod (no self) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a __private method (with self as first parameter) within the Buildings class.
-# TODO This should be a __private method (with self as first parameter) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO Buildings.find_buildings_within(num_edges, building: Building)
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-# TODO This should be a method (with self as first parameter) within the Buildings class.
-
 if __name__ == "__main__":
     main()
 
